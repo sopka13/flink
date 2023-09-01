@@ -1,10 +1,6 @@
-import com.typesafe.config.ConfigFactory
-import configurations.ConsumerConfiguration
-import org.apache.flink.api.common.serialization.{SimpleStringEncoder, SimpleStringSchema}
+import org.apache.flink.api.common.serialization.SimpleStringEncoder
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.scala.{AggregateDataSet, createTypeInformation}
 import org.apache.flink.core.fs.Path
-import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, FlinkKafkaProducer}
@@ -21,7 +17,7 @@ object WordCounter {
     val kafkaConsumer: FlinkKafkaConsumer[String] = KafkaConsumer.consumer
     val stringInputStream: DataStream[String] = env.addSource(kafkaConsumer)
     val stringInputStreamSecond = env.readTextFile("/home/sopka13/Temp/test_text_file_src")
-//    val allStreams = stringInputStream.union(stringInputStreamSecond)
+    val allStreams = stringInputStream.union(stringInputStreamSecond)
 
     // Outputs
     val kafkaProducer: FlinkKafkaProducer[String] = KafkaProducer.producer
@@ -42,7 +38,7 @@ object WordCounter {
       .name("file_dst")
 
     // Sink to STDOUT
-    allStreams.print()
+    stringInputStream.print()
 
     env.execute("My_first_job")
   }
@@ -51,6 +47,6 @@ object WordCounter {
   // Start Kafka producer to Kafka.src    # src   # +
   // Start Kafka consumer from kafka.src  # src   # +
   // Start Kafka consumer from kafka.dst  # dst   # +
-  // Start Flink Job                      # dst   #
-  // Start Tail from dst file             # dst
+  // Start Flink Job                      # dst   # +
+  // Start Tail from dst file             # dst   # +
 }
